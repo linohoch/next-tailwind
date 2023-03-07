@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    .toPrev {
+        visibility: visible;
+        transform: translate(-200%);
+    }
+    .toView {
+        visibility: visible;
+        transform: translate(-100%);
+    }
+    .ready {
+        visibility: visible;
+    }
+    .toStart {
+        visibility: hidden;
+    }
+    .toInit {
+        visibility: hidden;
+        transform: translate(+100%);
+    }
+    .marginR100{
+        margin-right: -100%;
+   }
+}

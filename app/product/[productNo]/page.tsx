@@ -4,6 +4,13 @@ import product from "@/store/product";
 import Image from "next/image";
 import React, {useEffect, useState} from "react";
 import {useSelector} from "@/store/store";
+import SwiperCore, {Navigation, Pagination} from "swiper";
+import {Swiper, SwiperSlide} from "swiper/react";
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/scrollbar';
+import assert from "assert";
 
 export default function Page({params}:{params:{productNo:number}}){
 
@@ -12,7 +19,12 @@ export default function Page({params}:{params:{productNo:number}}){
     const [optA, setOptA] = useState('')
     const [optB, setOptB] = useState('')
     const [expend, setExpend] = useState(false)
-    const [selectedImage, setIImage] = useState()
+    const [selectedImage, setIImage] = useState(0)
+    const [turn, setTurn] = useState({
+        prev:0,
+        now:0,
+        next:0
+    })
     const handleSelectOpt=(e: { currentTarget: { name: string; value: string; }; })=>{
         let opt = e.currentTarget.name;
         let selected = e.currentTarget.value
@@ -22,22 +34,20 @@ export default function Page({params}:{params:{productNo:number}}){
     useEffect(()=>{
         //가격변경
     },[optA,optB])
-    // const handleToggle=(e)=>{
-    //     let control = e.currentTarget.getAttribute('aria-controls')
-    //     let status = e.currentTarget.getAttribute('aria-expended')
-    //     document.getElementById(control)?.setAttribute('hidden', status)
-    // }
+    // SwiperCore.use([Navigation, Pagination]);
+    useEffect(() => {
+        product && slider(product.photo.length-1, 5);
+    },[product])
 
     return(
         <>
             <div className="flex flex-col w-full md:w-4/5">
                 <div className="product-summary flex flex-wrap pb-10 relative h-screen overflow-scroll">
-
                     <div className="image-box w-3/5 h-3/5 flex sticky top-0">
                         <div className="slide-thumbnail h-full overflow-scroll">
                             {product?.photo &&
                                 product.photo.map((url, index)=>(
-                                    <div className="thumnail m-2" key={index}>
+                                    <div className="thumbnail m-2" key={index}>
                                         <Image className="rounded-xl border-1 aspect-square object-cover"
                                                src={url}
                                                alt="thumbnail"
@@ -48,13 +58,18 @@ export default function Page({params}:{params:{productNo:number}}){
                                 ))
                             }
                         </div>
-                        <div className="selected-image w-full mt-2">
-                            {product?.thumbnail &&
-                                <Image className="w-full border-1 rounded-2xl aspect-square object-cover"
-                                       src={product?.thumbnail}
-                                       alt="selected-image"
-                                       width={100}
-                                       height={100}/>}
+                        <div className="slide-wrapper relative selected-image w-full mt-2 overflow-hidden">
+                            {product?.photo &&
+                                product.photo.map((url:string, index:number)=>(
+                                    <div key={index} data-num={index} className={"w-full bg-gray-100 image-slide relative transition-transform duration-700 float-left"+(index!==0?' marginR100':'')}>
+                                        <Image className="w-full border-1 rounded-2xl aspect-square object-cover"
+                                               src={url}
+                                               alt="imageSlide"
+                                               width={100}
+                                               height={100}/>
+                                    </div>
+                                ))
+                            }
                         </div>
                     </div>
 
@@ -75,7 +90,7 @@ export default function Page({params}:{params:{productNo:number}}){
                                 <div className="">
                                     optionA
                                     <fieldset name="p-option" className="flex pt-3 pb-3">
-                                        <div className="">
+                                        <div className="rounded-xl border-1 pr-3">
                                             <input
                                                 name="optA"
                                                 type="radio"
@@ -86,10 +101,10 @@ export default function Page({params}:{params:{productNo:number}}){
                                                 className="peer appearance-none"/>
                                             <label
                                                 htmlFor="option1"
-                                                className="border rounded-xl w-fit p-2 m-2 hover:bg-gray-100 select-none bg-gray-100 peer-checked:border-2 peer-checked:border-teal-200">
+                                                className="rounded-xl p-2 hover:bg-gray-100 select-none bg-gray-100 border-2 border-transparent peer-checked:border-2 peer-checked:border-teal-200">
                                                 option1</label>
                                         </div>
-                                        <div className="">
+                                        <div className="rounded-xl border-1 pr-3">
                                             <input
                                                 name="optA"
                                                 type="radio"
@@ -100,7 +115,7 @@ export default function Page({params}:{params:{productNo:number}}){
                                                 className="peer appearance-none"/>
                                             <label
                                                 htmlFor="option2"
-                                                className="border rounded-xl w-fit p-2 m-2 hover:bg-gray-100 select-none bg-gray-100 peer-checked:border-2 peer-checked:border-teal-200">
+                                                className="rounded-xl p-2 hover:bg-gray-100 select-none bg-gray-100 border-2 border-transparent peer-checked:border-2 peer-checked:border-teal-200">
                                                 option2</label>
                                         </div>
                                     </fieldset>
@@ -108,7 +123,7 @@ export default function Page({params}:{params:{productNo:number}}){
                                 <div className="">
                                     optionB
                                     <fieldset className="flex pt-3 pb-3">
-                                        <div className="">
+                                        <div className="rounded-xl border-1 pr-3">
                                             <input
                                                 name="optB"
                                                 type="radio"
@@ -119,10 +134,10 @@ export default function Page({params}:{params:{productNo:number}}){
                                                 className="peer appearance-none"/>
                                             <label
                                                 htmlFor="option3"
-                                                className="border rounded-xl w-fit p-2 m-2 hover:bg-gray-100 select-none bg-gray-100 peer-checked:border-2 peer-checked:border-teal-200">
+                                                className="rounded-xl p-2 hover:bg-gray-100 select-none bg-gray-100 border-2 border-transparent peer-checked:border-2 peer-checked:border-teal-200">
                                                 option1</label>
                                         </div>
-                                        <div className="">
+                                        <div className="rounded-xl border-1 pr-3">
                                             <input
                                                 name="optB"
                                                 type="radio"
@@ -133,7 +148,7 @@ export default function Page({params}:{params:{productNo:number}}){
                                                 className="peer appearance-none"/>
                                             <label
                                                 htmlFor="option4"
-                                                className="border rounded-xl w-fit p-2 m-2 hover:bg-gray-100 select-none bg-gray-100 peer-checked:border-2 peer-checked:border-teal-200">
+                                                className="rounded-xl p-2 hover:bg-gray-100 select-none bg-gray-100 border-2 border-transparent peer-checked:border-2 peer-checked:border-teal-200">
                                                 option2</label>
                                         </div>
                                     </fieldset>
@@ -210,3 +225,41 @@ export default function Page({params}:{params:{productNo:number}}){
         </>
     )
 }
+const changeClass=(prev: number, now: number, next: number, ready: number)=>{
+    document.querySelectorAll('.image-slide').forEach((el)=>{
+        let index = Number(el.getAttribute('data-num'))
+        if(index==prev){
+            el.classList.remove('toPrev')
+            if(index==0){el.classList.add('toInit')}
+            else{el.classList.add('toStart')}
+        } else if(index==now){
+            el.classList.remove('toView')
+            el.classList.add('toPrev')
+        } else if(index==next){
+            el.classList.remove('ready')
+            if(index==0){el.classList.remove('toInit')}
+            else{el.classList.add('toView')}
+        } else if(index==ready){
+            el.classList.remove('toStart')
+            el.classList.add('ready')
+        }
+    })
+}
+const slider=(lastIndex: number, sec: number)=>{
+    assert(sec>1)
+    let prev=lastIndex
+    let now =0
+    let next=1
+    let ready=2
+    setInterval(() => {
+            changeClass(prev, now, next, ready);
+            prev=now
+            now=next
+            next=ready
+            ready=(ready===lastIndex)?0:ready+1
+        console.log(prev,'-',now,'-',next,'-',ready)
+        }
+        , sec*1000);
+    return
+}
+
